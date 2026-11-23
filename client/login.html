@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — Rally Stage Tracker</title>
+    <!-- ДОБАВЛЕНО: Шрифты и иконки -->
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <nav id="nav"><ul>
+        <li><a href="index.html">Этапы</a></li>
+        <li><a href="stage.html">Детали</a></li>
+        <li><a href="admin.html">Админ</a></li>
+    </ul></nav>
+</header>
+<div class="overlay" id="overlay"></div>
+
+<div class="form-page">
+    <div class="form-card">
+        <h2>Вход в систему</h2>
+        <p class="subtitle">Введите данные для доступа к телеметрии</p>
+        
+        <!-- ДОБАВЛЕНО: id="loginForm" для JS -->
+        <form id="loginForm">
+            <div class="fg">
+                <label>Логин / Email <span class="req">*</span></label>
+                <div class="input-wrap">
+                    <!-- ДОБАВЛЕНО: id="email" -->
+                    <input type="text" id="email" placeholder="admin или your@email.com" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </div>
+            <div class="fg">
+                <label>Пароль <span class="req">*</span></label>
+                <div class="input-wrap">
+                    <!-- ДОБАВЛЕНО: id="password" -->
+                    <input type="password" id="password" placeholder="Введите пароль" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+            
+            <!-- ДОБАВЛЕНО: id="submitBtn" для анимации загрузки -->
+            <button type="submit" class="form-btn" id="submitBtn">Войти</button>
+            
+            <!-- ДОБАВЛЕНО: Блок для сообщений об ошибках/успехе -->
+            <div id="message" class="message" style="display: none;"></div>
+        </form>
+        
+        <div class="form-alt">
+            Нет аккаунта? <a href="register.html">Зарегистрироваться →</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+        <div class="footer-copy">© 2026 Rally Stage Tracker. Все права защищены.</div>
+        <div class="footer-socials">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+// 1. Логика гамбургер-меню
+const ham = document.getElementById('hamburger');
+const nav = document.getElementById('nav');
+const ov = document.getElementById('overlay');
+
+ham.addEventListener('click', () => {
+    ham.classList.toggle('active');
+    nav.classList.toggle('open');
+    ov.classList.toggle('show');
+});
+ov.addEventListener('click', () => {
+    ham.classList.remove('active');
+    nav.classList.remove('open');
+    ov.classList.remove('show');
+});
+
+// 2. ЛОГИКА АВТОРИЗАЦИИ (Связь с Flask-бэкендом)
+const registeredMessage = new URLSearchParams(window.location.search).get('registered');
+if (registeredMessage === '1') {
+    const registrationNotice = document.getElementById('message');
+    registrationNotice.textContent = 'Аккаунт создан и сохранён. Войдите, используя email и пароль.';
+    registrationNotice.className = 'message success';
+    registrationNotice.style.display = 'block';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Останавливаем стандартную перезагрузку страницы
+
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
+    const msgDiv = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Сбрасываем сообщения и включаем состояние загрузки
+    msgDiv.style.display = 'none';
+    msgDiv.className = 'message';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Проверка...';
+
+    try {
+        // Отправляем запрос на наш Flask-сервер
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // ✅ УСПЕХ: Сохраняем токен и данные пользователя в браузере
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            msgDiv.textContent = 'Успешный вход! Перенаправление...';
+            msgDiv.classList.add('success');
+            msgDiv.style.display = 'block';
+
+            // Перенаправляем в зависимости от роли через 1 секунду
+            setTimeout(() => {
+                const next = new URLSearchParams(window.location.search).get('next');
+                // Разрешаем только локальные пути, чтобы исключить open redirect.
+                if (next && next.startsWith('/') && !next.startsWith('//')) {
+                    window.location.href = next;
+                } else if (data.user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
+
+        } else {
+            // ❌ ОШИБКА: Показываем сообщение от сервера (например, "Неверный пароль")
+            msgDiv.textContent = data.message || 'Ошибка входа';
+            msgDiv.classList.add('error');
+            msgDiv.style.display = 'block';
+            
+            // Возвращаем кнопку в исходное состояние
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Войти';
+        }
+    } catch (error) {
+        // ❌ ОШИБКА СЕТИ: Сервер выключен или недоступен
+        console.error('Ошибка сети:', error);
+        msgDiv.textContent = 'Ошибка соединения с сервером. Убедитесь, что он запущен (порт 5000).';
+        msgDiv.classList.add('error');
+        msgDiv.style.display = 'block';
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Войти';
+    }
+});
+</script>
+</body>
+</html>

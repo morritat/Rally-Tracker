@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Регистрация — Rally Stage Tracker</title>
+<link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <nav id="nav"><ul>
+        <li><a href="index.html">Этапы</a></li>
+        <li><a href="stage.html">Детали</a></li>
+        <li><a href="admin.html">Админ</a></li>
+    </ul></nav>
+</header>
+<div class="overlay" id="overlay"></div>
+
+<div class="form-page">
+    <div class="form-card">
+        <h2>Регистрация</h2>
+        <p class="subtitle">Создайте аккаунт для доступа к телеметрии</p>
+        <form id="registerForm">
+            <div class="fg">
+                <label>Имя <span class="req">*</span></label>
+                <div class="input-wrap">
+                    <input type="text" id="firstName" placeholder="Иван" required>
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            <div class="fg">
+                <label>Фамилия <span class="req">*</span></label>
+                <div class="input-wrap">
+                    <input type="text" id="lastName" placeholder="Иванов" required>
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            <div class="fg">
+                <label>Email <span class="req">*</span></label>
+                <div class="input-wrap">
+                    <input type="email" id="email" placeholder="your@email.com" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </div>
+            <div class="fg">
+                <label>Пароль <span class="req">*</span></label>
+                <div class="input-wrap">
+                    <input type="password" id="password" placeholder="Минимум 6 символов" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="strength"><div class="strength-bar" id="strengthBar"></div></div>
+                <div class="strength-text" id="strengthText">Введите пароль</div>
+            </div>
+            <div class="fg">
+                <label>Подтверждение пароля <span class="req">*</span></label>
+                <div class="input-wrap">
+                    <input type="password" id="confirmPassword" placeholder="Повторите пароль" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+            <div class="check-row">
+                <input type="checkbox" id="agreeTerms" required>
+                <label for="agreeTerms">Я согласен с <a href="#">правилами</a> и <a href="#">политикой конфиденциальности</a></label>
+            </div>
+            <button type="submit" class="form-btn" id="registerBtn">Зарегистрироваться</button>
+            <div id="registerMessage" class="message" style="display:none; margin-top:1rem;"></div>
+        </form>
+        <div class="form-alt">
+            Уже есть аккаунт? <a href="login.html">Войти →</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+        <div class="footer-copy">© 2026 Rally Stage Tracker. Все права защищены.</div>
+        <div class="footer-socials">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+const ham=document.getElementById('hamburger'),nav=document.getElementById('nav'),ov=document.getElementById('overlay');
+ham.addEventListener('click',()=>{ham.classList.toggle('active');nav.classList.toggle('open');ov.classList.toggle('show')});
+ov.addEventListener('click',()=>{ham.classList.remove('active');nav.classList.remove('open');ov.classList.remove('show')});
+
+const password=document.getElementById('password');
+const strengthBar=document.getElementById('strengthBar');
+const strengthText=document.getElementById('strengthText');
+
+password.addEventListener('input',()=>{
+    const val=password.value;
+    strengthBar.className='strength-bar';
+    if(val.length===0){strengthText.textContent='Введите пароль';return;}
+    let s=0;
+    if(val.length>=6)s++;if(val.length>=10)s++;
+    if(/[A-Z]/.test(val)&&/[a-z]/.test(val))s++;
+    if(/[0-9]/.test(val))s++;if(/[^A-Za-z0-9]/.test(val))s++;
+    if(s<=2){strengthBar.classList.add('weak');strengthText.textContent='Слабый пароль';}
+    else if(s<=3){strengthBar.classList.add('medium');strengthText.textContent='Средний пароль';}
+    else{strengthBar.classList.add('strong');strengthText.textContent='Надёжный пароль';}
+});
+
+document.getElementById('registerForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const passwordValue = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const msg = document.getElementById('registerMessage');
+    const button = document.getElementById('registerBtn');
+    msg.style.display = 'block';
+    msg.className = 'message error';
+    if (passwordValue !== confirmPassword) {
+        msg.textContent = 'Пароли не совпадают.';
+        return;
+    }
+    if (!document.getElementById('agreeTerms').checked) {
+        msg.textContent = 'Подтвердите согласие с правилами.';
+        return;
+    }
+    button.disabled = true;
+    button.textContent = 'Регистрация...';
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password: passwordValue, fullName: `${firstName} ${lastName}` })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Не удалось зарегистрироваться');
+        msg.className = 'message success';
+        msg.textContent = 'Регистрация завершена! Данные сохранены. Теперь войдите в аккаунт.';
+        setTimeout(() => window.location.href = 'login.html?registered=1', 900);
+    } catch (err) {
+        msg.className = 'message error';
+        msg.textContent = err.message || 'Ошибка соединения с сервером.';
+        button.disabled = false;
+        button.textContent = 'Зарегистрироваться';
+    }
+});
+</script>
+</body>
+</html>

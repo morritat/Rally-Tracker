@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rally Stage Tracker — 2026</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <nav id="nav">
+        <ul>
+            <li><a href="/" class="active">Этапы</a></li>
+            <li><a href="/login.html" class="btn-nav">Вход</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="overlay" id="overlay"></div>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-year">2026</div>
+        <div class="hero-title">RALLY STAGE</div>
+        <div class="hero-subtitle">Карелия Гран При</div>
+        <div class="hero-tagline">Ранняя регистрация открыта</div>
+        <p class="hero-desc">Автоматизация учёта результатов раллийных соревнований.</p>
+        <a href="#stages" class="btn">Смотреть этапы <i class="fas fa-chevron-right" style="font-size:0.7em"></i></a>
+    </div>
+</section>
+
+<!-- Текущая погода в Карелии вместо обратного отсчёта -->
+<section class="weather-section" aria-label="Текущая погода в Карелии">
+    <div class="weather-panel" id="currentWeatherTop">
+        <div class="weather-heading">Погода в Карелии</div>
+        <div class="weather-loading">Загрузка текущей погоды...</div>
+    </div>
+</section>
+
+<!-- Карточки этапов: пустой контейнер, заполнит JS -->
+<section class="section" id="stages">
+    <div class="section-header">
+        <h2 class="section-title">Этапы</h2>
+    </div>
+    <div class="stages-grid" id="stagesGrid">
+        <div class="sc-desc">Загрузка этапов с сервера...</div>
+    </div>
+    <!-- Повторный погодный блок под списком гонок -->
+    <div class="weather-panel weather-panel-bottom" id="currentWeatherBottom">
+        <div class="weather-heading">Погода в Карелии</div>
+        <div class="weather-loading">Загрузка текущей погоды...</div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+        <div class="footer-copy">© 2026 Rally Stage Tracker.</div>
+    </div>
+</footer>
+
+<script src="/static/js/index.js"></script>
+</body>
+</html>

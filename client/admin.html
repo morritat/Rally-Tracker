@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ — Rally Stage Tracker</title>
+    <!-- ДОБАВЛЕНО: Шрифты и иконки -->
+        <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <nav id="nav"><ul>
+        <li><a href="index.html">Этапы</a></li>
+        <li><a href="stage.html">Детали</a></li>
+        <li><a href="admin.html" class="active">Админ</a></li>
+        <li><a href="#" id="logoutBtn" class="btn-nav">Выход</a></li>
+    </ul></nav>
+</header>
+<div class="overlay" id="overlay"></div>
+
+<section class="section" style="padding-top:7rem">
+    <div class="section-header">
+        <h2 class="section-title">User Management</h2>
+        <!-- Кнопка добавления пока декоративная, можно привязать к модалке позже -->
+        <button class="btn" id="addUserBtn"><i class="fas fa-plus"></i> Добавить</button>
+    </div>
+
+    <div class="admin-stats" id="adminStats">
+        <div class="stat-card"><div class="label">Всего</div><div class="value" id="statTotal">0</div></div>
+        <div class="stat-card"><div class="label">Активных</div><div class="value green" id="statActive">0</div></div>
+        <div class="stat-card"><div class="label">Заблокировано</div><div class="value yellow" id="statBlocked">0</div></div>
+        <div class="stat-card"><div class="label">Админов</div><div class="value red" id="statAdmins">0</div></div>
+    </div>
+
+    <table class="admin-table">
+        <thead><tr><th>ID</th><th>Email</th><th>Имя</th><th>Роль</th><th>Статус</th><th>Действия</th></tr></thead>
+        <!-- ДОБАВЛЕНО: id для JS -->
+        <tbody id="usersTableBody">
+            <tr><td colspan="6" style="text-align:center; padding: 2rem;">Загрузка данных...</td></tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <div id="paginationInfo">Показано 0 из 0</div>
+        <div class="pg-btns">
+            <button class="pg-btn active">1</button>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo">RALLY <span class="red">STAGE</span> TRACKER</div>
+        <div class="footer-copy">© 2026 Rally Stage Tracker. Все права защищены.</div>
+        <div class="footer-socials">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+
+<!-- Скрипты -->
+<script src="../static/js/admin.js"></script>
+<script>
+    // Гамбургер-меню
+    const ham = document.getElementById('hamburger'), nav = document.getElementById('nav'), ov = document.getElementById('overlay');
+    ham.addEventListener('click', () => { ham.classList.toggle('active'); nav.classList.toggle('open'); ov.classList.toggle('show'); });
+    ov.addEventListener('click', () => { ham.classList.remove('active'); nav.classList.remove('open'); ov.classList.remove('show'); });
+    
+    // Выход из системы
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'login.html';
+    });
+</script>
+</body>
+</html>
